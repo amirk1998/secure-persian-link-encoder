@@ -11,6 +11,11 @@ on:
 env:
   APP_NAME: SecurePersianLink
 
+# For solving 403 errors when creating releases
+permissions:
+  contents: write
+  packages: write
+
 jobs:
   # Job 1: Determine version
   version:
