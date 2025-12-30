@@ -1,0 +1,488 @@
+name: Build and Release
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+env:
+  APP_NAME: SecurePersianLink
+
+jobs:
+  # Job 1: Determine version
+  version:
+    name: Determine Version
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.get_version.outputs.version }}
+      tag: ${{ steps.get_version.outputs.tag }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get version
+        id: get_version
+        run: |
+          if [[ $GITHUB_REF == refs/tags/* ]]; then
+            VERSION=${GITHUB_REF#refs/tags/v}
+            echo "version=$VERSION" >> $GITHUB_OUTPUT
+            echo "tag=v$VERSION" >> $GITHUB_OUTPUT
+          else
+            # Get last tag or use 0.0.0
+            LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+            VERSION=${LAST_TAG#v}
+            
+            # Increment patch version
+            IFS='.' read -r -a VERSION_PARTS <<< "$VERSION"
+            MAJOR=${VERSION_PARTS[0]}
+            MINOR=${VERSION_PARTS[1]}
+            PATCH=${VERSION_PARTS[2]}
+            PATCH=$((PATCH + 1))
+            
+            NEW_VERSION="$MAJOR.$MINOR.$PATCH"
+            
+            echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
+            echo "tag=v$NEW_VERSION" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Display version
+        run: |
+          echo "Version: ${{ steps.get_version.outputs.version }}"
+          echo "Tag: ${{ steps.get_version.outputs.tag }}"
+
+  # Job 2: Build Windows EXE
+  build-windows:
+    name: Build Windows EXE
+    needs: version
+    runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r desktop/requirements.txt
+          pip install pyinstaller
+
+      - name: Build EXE
+        run: |
+          cd desktop
+          pyinstaller --name="${{ env.APP_NAME }}" `
+                      --onefile `
+                      --windowed `
+                      --noconsole `
+                      --icon=icon.ico `
+                      --add-data="crypto_core.py;." `
+                      --hidden-import=customtkinter `
+                      --hidden-import=PIL `
+                      --hidden-import=PIL._tkinter_finder `
+                      --hidden-import=pyperclip `
+                      --hidden-import=cryptography `
+                      --hidden-import=cryptography.hazmat.primitives.kdf.pbkdf2 `
+                      --hidden-import=cryptography.hazmat.primitives.ciphers.aead `
+                      --hidden-import=cryptography.hazmat.primitives.hashes `
+                      --hidden-import=cryptography.hazmat.backends `
+                      --hidden-import=cryptography.hazmat.backends.openssl `
+                      main.py
+
+      - name: Create version file
+        run: |
+          echo "${{ needs.version.outputs.version }}" > desktop/dist/VERSION.txt
+
+      - name: Upload Windows artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-exe
+          path: desktop/dist/${{ env.APP_NAME }}.exe
+
+      - name: Upload version file
+        uses: actions/upload-artifact@v4
+        with:
+          name: version-file
+          path: desktop/dist/VERSION.txt
+
+  # Job 3: Build Windows Portable (ZIP)
+  build-windows-portable:
+    name: Build Windows Portable
+    needs: version
+    runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r desktop/requirements.txt
+          pip install pyinstaller
+
+      - name: Build Portable
+        run: |
+          cd desktop
+          pyinstaller --name="${{ env.APP_NAME }}" `
+                      --onedir `
+                      --windowed `
+                      --noconsole `
+                      --icon=icon.ico `
+                      --add-data="crypto_core.py;." `
+                      --hidden-import=customtkinter `
+                      --hidden-import=PIL `
+                      --hidden-import=PIL._tkinter_finder `
+                      --hidden-import=pyperclip `
+                      --hidden-import=cryptography `
+                      --hidden-import=cryptography.hazmat.primitives.kdf.pbkdf2 `
+                      --hidden-import=cryptography.hazmat.primitives.ciphers.aead `
+                      --hidden-import=cryptography.hazmat.primitives.hashes `
+                      --hidden-import=cryptography.hazmat.backends `
+                      --hidden-import=cryptography.hazmat.backends.openssl `
+                      main.py
+
+      - name: Create README for portable
+        run: |
+          cd desktop/dist/${{ env.APP_NAME }}
+          echo "Secure Persian Link Encoder v${{ needs.version.outputs.version }}" > README.txt
+          echo "" >> README.txt
+          echo "Portable Version - No Installation Required" >> README.txt
+          echo "" >> README.txt
+          echo "To run: Double-click ${{ env.APP_NAME }}.exe" >> README.txt
+          echo "" >> README.txt
+          echo "This is a portable version. You can run it from anywhere." >> README.txt
+
+      - name: Create ZIP
+        run: |
+          cd desktop/dist
+          Compress-Archive -Path "${{ env.APP_NAME }}" -DestinationPath "${{ env.APP_NAME }}-portable.zip"
+
+      - name: Upload Windows Portable artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-portable
+          path: desktop/dist/${{ env.APP_NAME }}-portable.zip
+
+  # Job 4: Build DEB package
+  build-deb:
+    name: Build DEB Package
+    needs: version
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3-tk python3-pil python3-pil.imagetk
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r desktop/requirements.txt
+          pip install pyinstaller
+
+      - name: Build Linux binary
+        run: |
+          cd desktop
+          pyinstaller --name="${{ env.APP_NAME }}" \
+                      --onefile \
+                      --windowed \
+                      --add-data="crypto_core.py:." \
+                      --hidden-import=customtkinter \
+                      --hidden-import=PIL \
+                      --hidden-import=PIL._tkinter_finder \
+                      --hidden-import=pyperclip \
+                      --hidden-import=cryptography \
+                      --hidden-import=cryptography.hazmat.primitives.kdf.pbkdf2 \
+                      --hidden-import=cryptography.hazmat.primitives.ciphers.aead \
+                      --hidden-import=cryptography.hazmat.primitives.hashes \
+                      --hidden-import=cryptography.hazmat.backends \
+                      --hidden-import=cryptography.hazmat.backends.openssl \
+                      main.py
+
+      - name: Create DEB package structure
+        run: |
+          VERSION="${{ needs.version.outputs.version }}"
+          PACKAGE_NAME="${{ env.APP_NAME }}_${VERSION}_amd64"
+
+          mkdir -p "$PACKAGE_NAME/DEBIAN"
+          mkdir -p "$PACKAGE_NAME/usr/bin"
+          mkdir -p "$PACKAGE_NAME/usr/share/applications"
+          mkdir -p "$PACKAGE_NAME/usr/share/pixmaps"
+
+          # Copy binary
+          cp desktop/dist/${{ env.APP_NAME }} "$PACKAGE_NAME/usr/bin/${{ env.APP_NAME }}"
+          chmod +x "$PACKAGE_NAME/usr/bin/${{ env.APP_NAME }}"
+
+          # Create control file
+          cat > "$PACKAGE_NAME/DEBIAN/control" << EOF
+          Package: secure-persian-link
+          Version: $VERSION
+          Section: utils
+          Priority: optional
+          Architecture: amd64
+          Depends: python3, python3-tk
+          Maintainer: Amir Hossein Kaveh <your-email@example.com>
+          Description: Secure Persian Link Encoder
+           Encrypt URLs into Persian text using AES-256-GCM encryption.
+           Fully offline and secure application for encoding and decoding URLs.
+          EOF
+
+          # Create desktop entry
+          cat > "$PACKAGE_NAME/usr/share/applications/${{ env.APP_NAME }}.desktop" << EOF
+          [Desktop Entry]
+          Version=1.0
+          Type=Application
+          Name=Secure Persian Link
+          Comment=Encrypt URLs into Persian text
+          Exec=${{ env.APP_NAME }}
+          Icon=${{ env.APP_NAME }}
+          Terminal=false
+          Categories=Utility;Security;
+          EOF
+
+          # Build DEB
+          dpkg-deb --build "$PACKAGE_NAME"
+
+          mv "${PACKAGE_NAME}.deb" "${{ env.APP_NAME }}_$VERSION.deb"
+
+      - name: Upload DEB artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-deb
+          path: ${{ env.APP_NAME }}_${{ needs.version.outputs.version }}.deb
+
+  # Job 5: Build RPM package
+  build-rpm:
+    name: Build RPM Package
+    needs: version
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3-tk python3-pil python3-pil.imagetk rpm
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r desktop/requirements.txt
+          pip install pyinstaller
+
+      - name: Build Linux binary
+        run: |
+          cd desktop
+          pyinstaller --name="${{ env.APP_NAME }}" \
+                      --onefile \
+                      --windowed \
+                      --add-data="crypto_core.py:." \
+                      --hidden-import=customtkinter \
+                      --hidden-import=PIL \
+                      --hidden-import=PIL._tkinter_finder \
+                      --hidden-import=pyperclip \
+                      --hidden-import=cryptography \
+                      --hidden-import=cryptography.hazmat.primitives.kdf.pbkdf2 \
+                      --hidden-import=cryptography.hazmat.primitives.ciphers.aead \
+                      --hidden-import=cryptography.hazmat.primitives.hashes \
+                      --hidden-import=cryptography.hazmat.backends \
+                      --hidden-import=cryptography.hazmat.backends.openssl \
+                      main.py
+
+      - name: Create RPM package
+        run: |
+          VERSION="${{ needs.version.outputs.version }}"
+
+          # Create RPM build structure
+          mkdir -p ~/rpmbuild/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
+
+          # Create spec file
+          cat > ~/rpmbuild/SPECS/secure-persian-link.spec << EOF
+          Name:           secure-persian-link
+          Version:        $VERSION
+          Release:        1%{?dist}
+          Summary:        Secure Persian Link Encoder
+
+          License:        MIT
+          URL:            https://github.com/yourusername/secure-persian-link
+
+          Requires:       python3, python3-tkinter
+
+          %description
+          Encrypt URLs into Persian text using AES-256-GCM encryption.
+          Fully offline and secure application for encoding and decoding URLs.
+
+          %install
+          mkdir -p %{buildroot}/usr/bin
+          mkdir -p %{buildroot}/usr/share/applications
+
+          cp $PWD/desktop/dist/${{ env.APP_NAME }} %{buildroot}/usr/bin/${{ env.APP_NAME }}
+          chmod +x %{buildroot}/usr/bin/${{ env.APP_NAME }}
+
+          cat > %{buildroot}/usr/share/applications/${{ env.APP_NAME }}.desktop << DESKTOP
+          [Desktop Entry]
+          Version=1.0
+          Type=Application
+          Name=Secure Persian Link
+          Comment=Encrypt URLs into Persian text
+          Exec=${{ env.APP_NAME }}
+          Terminal=false
+          Categories=Utility;Security;
+          DESKTOP
+
+          %files
+          /usr/bin/${{ env.APP_NAME }}
+          /usr/share/applications/${{ env.APP_NAME }}.desktop
+
+          %changelog
+          * $(date +"%a %b %d %Y") Builder <builder@example.com> - $VERSION-1
+          - Automated build
+          EOF
+
+          # Build RPM
+          rpmbuild -bb ~/rpmbuild/SPECS/secure-persian-link.spec
+
+          # Copy RPM to workspace
+          cp ~/rpmbuild/RPMS/x86_64/secure-persian-link-$VERSION-*.rpm ./${{ env.APP_NAME }}_$VERSION.rpm
+
+      - name: Upload RPM artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-rpm
+          path: ${{ env.APP_NAME }}_${{ needs.version.outputs.version }}.rpm
+
+  # Job 6: Create Release
+  create-release:
+    name: Create GitHub Release
+    needs:
+      [version, build-windows, build-windows-portable, build-deb, build-rpm]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Display structure
+        run: ls -R artifacts
+
+      - name: Prepare release assets
+        run: |
+          mkdir -p release
+
+          # Windows EXE
+          if [ -f "artifacts/windows-exe/${{ env.APP_NAME }}.exe" ]; then
+            cp "artifacts/windows-exe/${{ env.APP_NAME }}.exe" \
+               "release/${{ env.APP_NAME }}_${{ needs.version.outputs.version }}_windows.exe"
+          fi
+
+          # Windows Portable
+          if [ -f "artifacts/windows-portable/${{ env.APP_NAME }}-portable.zip" ]; then
+            cp "artifacts/windows-portable/${{ env.APP_NAME }}-portable.zip" \
+               "release/${{ env.APP_NAME }}_${{ needs.version.outputs.version }}_windows_portable.zip"
+          fi
+
+          # DEB package
+          if [ -f "artifacts/linux-deb/${{ env.APP_NAME }}_${{ needs.version.outputs.version }}.deb" ]; then
+            cp "artifacts/linux-deb/${{ env.APP_NAME }}_${{ needs.version.outputs.version }}.deb" \
+               "release/"
+          fi
+
+          # RPM package
+          if [ -f "artifacts/linux-rpm/${{ env.APP_NAME }}_${{ needs.version.outputs.version }}.rpm" ]; then
+            cp "artifacts/linux-rpm/${{ env.APP_NAME }}_${{ needs.version.outputs.version }}.rpm" \
+               "release/"
+          fi
+
+          ls -lh release/
+
+      - name: Generate release notes
+        run: |
+          cat > release_notes.md << EOF
+          # 🔐 Secure Persian Link Encoder v${{ needs.version.outputs.version }}
+
+          ## 📦 Downloads
+
+          ### Windows
+          - **EXE (Single File)**: \`${{ env.APP_NAME }}_${{ needs.version.outputs.version }}_windows.exe\`
+            - Download and run directly
+            - No installation required
+
+          - **Portable (ZIP)**: \`${{ env.APP_NAME }}_${{ needs.version.outputs.version }}_windows_portable.zip\`
+            - Extract and run
+            - All dependencies included
+
+          ### Linux
+          - **DEB Package**: \`${{ env.APP_NAME }}_${{ needs.version.outputs.version }}.deb\`
+            - For Debian/Ubuntu: \`sudo dpkg -i filename.deb\`
+
+          - **RPM Package**: \`${{ env.APP_NAME }}_${{ needs.version.outputs.version }}.rpm\`
+            - For Fedora/RHEL: \`sudo rpm -i filename.rpm\`
+
+          ## ✨ Features
+          - 🔒 AES-256-GCM Encryption
+          - 📱 Bilingual Interface (فارسی / English)
+          - 🌙 Dark/Light Mode
+          - 🎨 Modern UI
+          - 💯 Fully Offline
+
+          ## 📝 Changelog
+          See full changelog in the repository.
+
+          ## 🐛 Bug Reports
+          Please report issues on GitHub Issues page.
+          EOF
+
+      - name: Create or update tag
+        if: github.ref == 'refs/heads/main'
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git tag -a "${{ needs.version.outputs.tag }}" -m "Release ${{ needs.version.outputs.tag }}"
+          git push origin "${{ needs.version.outputs.tag }}" || true
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ needs.version.outputs.tag }}
+          name: Release ${{ needs.version.outputs.version }}
+          body_path: release_notes.md
+          draft: false
+          prerelease: false
+          files: release/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

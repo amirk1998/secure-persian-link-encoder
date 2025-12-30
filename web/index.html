@@ -10,20 +10,76 @@
     <meta name="theme-color" content="#667eea" />
 
     <!-- PWA Meta Tags -->
-    <link rel="manifest" href="/manifest.json" />
+    <link rel="manifest" href="manifest.json" />
     <link
       rel="icon"
       type="image/png"
       sizes="192x192"
-      href="/icons/icon-192x192.png"
+      href="icons/android-icon-192x192.png"
     />
     <link
       rel="icon"
       type="image/png"
-      sizes="512x512"
-      href="/icons/icon-512x512.png"
+      sizes="96x96"
+      href="icons/favicon-96x96.png"
     />
-    <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href="icons/favicon-32x32.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="16x16"
+      href="icons/favicon-16x16.png"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="icons/apple-icon-180x180.png"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="152x152"
+      href="icons/apple-icon-152x152.png"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="144x144"
+      href="icons/apple-icon-144x144.png"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="120x120"
+      href="icons/apple-icon-120x120.png"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="114x114"
+      href="icons/apple-icon-114x114.png"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="76x76"
+      href="icons/apple-icon-76x76.png"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="72x72"
+      href="icons/apple-icon-72x72.png"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="60x60"
+      href="icons/apple-icon-60x60.png"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="57x57"
+      href="icons/apple-icon-57x57.png"
+    />
 
     <!-- iOS Meta Tags -->
     <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -32,6 +88,11 @@
       content="black-translucent"
     />
     <meta name="apple-mobile-web-app-title" content="رمزنگار لینک" />
+
+    <!-- Microsoft Tiles -->
+    <meta name="msapplication-TileColor" content="#667eea" />
+    <meta name="msapplication-TileImage" content="icons/ms-icon-144x144.png" />
+    <meta name="msapplication-config" content="icons/browserconfig.xml" />
 
     <title>🔐 رمزنگار لینک امن فارسی</title>
     <style>
@@ -621,6 +682,7 @@
       const closeBanner = document.getElementById('close-banner');
 
       window.addEventListener('beforeinstallprompt', (e) => {
+        console.log('beforeinstallprompt fired');
         e.preventDefault();
         deferredPrompt = e;
         installBanner.classList.add('show');
@@ -630,6 +692,7 @@
         if (deferredPrompt) {
           deferredPrompt.prompt();
           const { outcome } = await deferredPrompt.userChoice;
+          console.log(`User response: ${outcome}`);
           if (outcome === 'accepted') {
             console.log('User accepted the install prompt');
           }
@@ -651,7 +714,7 @@
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
           navigator.serviceWorker
-            .register('/service-worker.js')
+            .register('service-worker.js')
             .then((registration) => {
               console.log('SW registered: ', registration);
             })

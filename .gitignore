@@ -90,3 +90,19 @@ docker-compose.override.yml
 *.pem
 *.key
 *.crt
+
+####################################
+# Build & Release
+####################################
+# Release artifacts
+release/
+artifacts/
+
+# GitHub Actions
+.github/workflows/*.tmp
+
+
+####################################
+# Miscellaneous
+####################################
+RELEASE_GUIDE.md
