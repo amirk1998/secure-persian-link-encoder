@@ -3,7 +3,6 @@
 یک برنامه دسکتاپ زیبا، امن و کاملاً آفلاین برای رمزنگاری آدرس‌های اینترنتی به متن فارسی با استفاده از رمزنگاری AES-256-GCM.
 
 ![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Linux-blue)
-![Python](https://img.shields.io/badge/Python-3.8)
 ![License](https://img.shields.io/badge/License-MIT-yellow)
 ![Encryption](https://img.shields.io/badge/Encryption-AES--256--GCM-red)
 
@@ -399,6 +398,6 @@ chmod +x "dist/Secure Persian Link Encoder"
 
 ---
 
-ساخته شده با ❤️ توسط [نام شما]
+ساخته شده با ❤️ توسط امیرحسین کاوه
 
 🔐 **امن بمانید، خصوصی بمانید!**
