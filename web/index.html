@@ -1,9 +1,39 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
+<html lang="fa" dir="rtl">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>🔐 Secure Persian Link Encoder</title>
+    <meta
+      name="description"
+      content="رمزنگاری و رمزگشایی لینک‌ها به متن فارسی - کاملاً آفلاین و امن"
+    />
+    <meta name="theme-color" content="#667eea" />
+
+    <!-- PWA Meta Tags -->
+    <link rel="manifest" href="/manifest.json" />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="192x192"
+      href="/icons/icon-192x192.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="512x512"
+      href="/icons/icon-512x512.png"
+    />
+    <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
+
+    <!-- iOS Meta Tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
+    <meta name="apple-mobile-web-app-title" content="رمزنگار لینک" />
+
+    <title>🔐 رمزنگار لینک امن فارسی</title>
     <style>
       * {
         margin: 0;
@@ -12,7 +42,7 @@
       }
 
       body {
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        font-family: Tahoma, 'Segoe UI', sans-serif;
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         min-height: 100vh;
         display: flex;
@@ -22,8 +52,8 @@
         transition: direction 0.3s ease;
       }
 
-      body[dir='rtl'] {
-        font-family: Tahoma, 'Segoe UI', sans-serif;
+      body[dir='ltr'] {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       }
 
       .container {
@@ -47,6 +77,69 @@
           opacity: 1;
           transform: translateY(0);
         }
+      }
+
+      .install-banner {
+        background: rgba(255, 255, 255, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 10px;
+        padding: 15px;
+        margin-bottom: 20px;
+        display: none;
+        align-items: center;
+        gap: 10px;
+        animation: slideDown 0.3s ease;
+      }
+
+      .install-banner.show {
+        display: flex;
+      }
+
+      @keyframes slideDown {
+        from {
+          opacity: 0;
+          transform: translateY(-20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .install-banner-text {
+        flex: 1;
+        color: white;
+        font-size: 14px;
+      }
+
+      .install-banner button {
+        background: white;
+        color: #667eea;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.3s ease;
+      }
+
+      .install-banner button:hover {
+        transform: scale(1.05);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+      }
+
+      .install-banner .close-btn {
+        background: transparent;
+        color: white;
+        font-size: 20px;
+        padding: 0;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+      }
+
+      .install-banner .close-btn:hover {
+        background: rgba(255, 255, 255, 0.2);
       }
 
       .header-row {
@@ -325,37 +418,65 @@
         color: rgba(255, 255, 255, 0.9);
         text-decoration: none;
       }
+
+      @media (max-width: 600px) {
+        .container {
+          padding: 20px;
+        }
+
+        h1 {
+          font-size: 22px;
+        }
+
+        .header-row {
+          flex-direction: column;
+          gap: 10px;
+        }
+
+        .lang-switch {
+          order: -1;
+        }
+      }
     </style>
   </head>
-  <body dir="ltr">
+  <body dir="rtl">
+    <!-- Install Banner -->
+    <div class="install-banner" id="install-banner">
+      <div class="install-banner-text" id="install-text">
+        📱 نصب اپلیکیشن برای دسترسی آسان‌تر و سریع‌تر
+      </div>
+      <button id="install-button">نصب</button>
+      <button class="close-btn" id="close-banner">×</button>
+    </div>
+
     <div class="container">
       <div class="header-row">
         <div style="width: 80px"></div>
-        <h1 id="main-title">🔐 Secure Persian Link Encoder</h1>
+        <h1 id="main-title">🔐 رمزنگار لینک امن فارسی</h1>
         <div class="lang-switch">
-          <button class="lang-btn active" onclick="switchLanguage('en')">
-            EN
+          <button class="lang-btn" onclick="switchLanguage('en')">EN</button>
+          <button class="lang-btn active" onclick="switchLanguage('fa')">
+            فا
           </button>
-          <button class="lang-btn" onclick="switchLanguage('fa')">فا</button>
         </div>
       </div>
       <p class="subtitle" id="subtitle">
-        Encrypt URLs into Persian text - Fully Offline & Secure
+        رمزنگاری لینک‌ها به متن فارسی - کاملاً آفلاین و امن
       </p>
 
       <div class="tabs">
         <div class="tab active" onclick="switchTab('encrypt')">
-          <span id="tab-encrypt">🔒 Encrypt</span>
+          <span id="tab-encrypt">🔒 رمزنگاری</span>
         </div>
         <div class="tab" onclick="switchTab('decrypt')">
-          <span id="tab-decrypt">🔓 Decrypt</span>
+          <span id="tab-decrypt">🔓 رمزگشایی</span>
         </div>
       </div>
 
       <!-- Encrypt Tab -->
       <div id="encrypt-tab" class="tab-content active">
         <div class="input-group">
-          <label id="label-url">🔗 URL to Encrypt:</label>
+          <label id="label-url">🔗 لینک برای رمزنگاری:</label>
           <input
             type="text"
             id="url-input"
@@ -364,11 +485,11 @@
         </div>
 
         <div class="input-group">
-          <label id="label-password">🔑 Password (Optional):</label>
+          <label id="label-password">🔑 رمز عبور (اختیاری):</label>
           <input
             type="password"
             id="password-input"
-            placeholder="Leave empty for default encryption"
+            placeholder="برای رمزنگاری پیش‌فرض خالی بگذارید"
           />
         </div>
 
@@ -379,39 +500,39 @@
             onchange="togglePassword()"
           />
           <label for="show-password" style="margin: 0" id="label-show-pass"
-            >Show password</label
+            >نمایش رمز عبور</label
           >
         </div>
 
         <div class="button-group">
           <button class="btn-primary" onclick="encryptURL()">
-            <span id="btn-encrypt">🔒 Encrypt</span>
+            <span id="btn-encrypt">🔒 رمزنگاری کن</span>
           </button>
           <button class="btn-secondary" onclick="resetEncrypt()">
-            <span id="btn-reset-enc">🔄 Reset</span>
+            <span id="btn-reset-enc">🔄 پاک کردن</span>
           </button>
         </div>
 
         <div class="input-group" style="margin-top: 20px">
-          <label id="label-encrypted">📄 Encrypted Persian Text:</label>
+          <label id="label-encrypted">📄 متن فارسی رمزشده:</label>
           <textarea
             id="encrypted-output"
             readonly
-            placeholder="Encrypted text will appear here..."
+            placeholder="متن رمزشده اینجا نمایش داده می‌شود..."
           ></textarea>
         </div>
 
         <div class="button-group">
           <button onclick="copyToClipboard('encrypted-output')">
-            <span id="btn-copy-enc">📋 Copy</span>
+            <span id="btn-copy-enc">📋 کپی</span>
           </button>
         </div>
 
         <div class="info-box">
           <span id="info-encrypt"
-            >ℹ️ <strong>Info:</strong> Without password, anyone with this tool
-            can decrypt. With password, only those who know it can
-            decrypt.</span
+            >ℹ️ <strong>توجه:</strong> بدون رمز عبور، هر کسی با این ابزار
+            می‌تواند رمزگشایی کند. با رمز عبور، فقط کسانی که آن را می‌دانند
+            می‌توانند رمزگشایی کنند.</span
           >
         </div>
       </div>
@@ -419,21 +540,21 @@
       <!-- Decrypt Tab -->
       <div id="decrypt-tab" class="tab-content">
         <div class="input-group">
-          <label id="label-persian">📄 Persian Text to Decrypt:</label>
+          <label id="label-persian">📄 متن فارسی برای رمزگشایی:</label>
           <textarea
             id="persian-input"
-            placeholder="Paste encrypted Persian text here..."
+            placeholder="متن فارسی رمزشده را اینجا بچسبانید..."
           ></textarea>
         </div>
 
         <div class="input-group">
           <label id="label-decrypt-pass"
-            >🔑 Password (if used during encryption):</label
+            >🔑 رمز عبور (اگر هنگام رمزنگاری استفاده شده):</label
           >
           <input
             type="password"
             id="decrypt-password-input"
-            placeholder="Leave empty if no password was used"
+            placeholder="اگر رمز استفاده نشده خالی بگذارید"
           />
         </div>
 
@@ -447,44 +568,44 @@
             for="show-decrypt-password"
             style="margin: 0"
             id="label-show-dec-pass"
-            >Show password</label
+            >نمایش رمز عبور</label
           >
         </div>
 
         <div class="button-group">
           <button class="btn-primary" onclick="decryptURL()">
-            <span id="btn-decrypt">🔓 Decrypt</span>
+            <span id="btn-decrypt">🔓 رمزگشایی کن</span>
           </button>
           <button class="btn-secondary" onclick="resetDecrypt()">
-            <span id="btn-reset-dec">🔄 Reset</span>
+            <span id="btn-reset-dec">🔄 پاک کردن</span>
           </button>
         </div>
 
         <div class="input-group" style="margin-top: 20px">
-          <label id="label-decrypted">🔗 Decrypted URL:</label>
+          <label id="label-decrypted">🔗 لینک رمزگشایی‌شده:</label>
           <input
             type="text"
             id="decrypted-output"
             readonly
-            placeholder="Decrypted URL will appear here..."
+            placeholder="لینک رمزگشایی‌شده اینجا نمایش داده می‌شود..."
           />
         </div>
 
         <div class="button-group">
           <button onclick="copyToClipboard('decrypted-output')">
-            <span id="btn-copy-dec">📋 Copy</span>
+            <span id="btn-copy-dec">📋 کپی</span>
           </button>
           <button onclick="openURL()">
-            <span id="btn-open">🌐 Open URL</span>
+            <span id="btn-open">🌐 باز کردن لینک</span>
           </button>
         </div>
       </div>
 
       <div class="footer">
         <span id="footer-text"
-          >Made with ❤️ |
-          <a href="https://github.com" target="_blank">GitHub</a> | AES-256-GCM
-          Encryption</span
+          >ساخته شده با ❤️ |
+          <a href="https://github.com" target="_blank">گیت‌هاب</a> | رمزنگاری
+          AES-256-GCM</span
         >
       </div>
     </div>
@@ -492,5 +613,53 @@
     <div class="notification" id="notification"></div>
 
     <script src="script.js"></script>
+    <script>
+      // PWA Install functionality
+      let deferredPrompt;
+      const installBanner = document.getElementById('install-banner');
+      const installButton = document.getElementById('install-button');
+      const closeBanner = document.getElementById('close-banner');
+
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        installBanner.classList.add('show');
+      });
+
+      installButton.addEventListener('click', async () => {
+        if (deferredPrompt) {
+          deferredPrompt.prompt();
+          const { outcome } = await deferredPrompt.userChoice;
+          if (outcome === 'accepted') {
+            console.log('User accepted the install prompt');
+          }
+          deferredPrompt = null;
+          installBanner.classList.remove('show');
+        }
+      });
+
+      closeBanner.addEventListener('click', () => {
+        installBanner.classList.remove('show');
+      });
+
+      window.addEventListener('appinstalled', () => {
+        console.log('PWA was installed');
+        installBanner.classList.remove('show');
+      });
+
+      // Register Service Worker
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker
+            .register('/service-worker.js')
+            .then((registration) => {
+              console.log('SW registered: ', registration);
+            })
+            .catch((registrationError) => {
+              console.log('SW registration failed: ', registrationError);
+            });
+        });
+      }
+    </script>
   </body>
 </html>
