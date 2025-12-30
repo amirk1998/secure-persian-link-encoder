@@ -212,9 +212,9 @@ desktop/
 ├── requirements.txt        # وابستگی‌های پایتون
 ├── build_windows.bat       # اسکریپت ساخت ویندوز
 ├── build_linux.sh          # اسکریپت ساخت لینوکس
-├── README.md              # مستندات انگلیسی
-├── README_FA.md           # مستندات فارسی
-└── icon.ico               # آیکون برنامه (اختیاری)
+├── README.md               # مستندات انگلیسی
+├── README_FA.md            # مستندات فارسی
+└── icon.ico                # آیکون برنامه (اختیاری)
 ```
 
 ---
@@ -326,8 +326,8 @@ chmod +x "dist/Secure Persian Link Encoder"
 
 ## 📧 تماس
 
-- **گیت‌هاب**: [@yourusername](https://github.com/yourusername)
-- **ایمیل**: your.email@example.com
+- **گیت‌هاب**: [@amirk1998](https://github.com/amirk1998)
+- **ایمیل**: amirk1998.pv@gmail.com
 
 ---
 

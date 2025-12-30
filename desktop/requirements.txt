@@ -1,0 +1,18 @@
+# Secure Persian Link Encoder - Desktop Version
+# Python Dependencies
+
+# UI Framework
+customtkinter>=5.2.2       # Modern UI framework (compatible with Python 3.7+)
+# tkinter                    # Built-in with Python (no pip install needed)
+
+# Cryptography
+cryptography>=46.0.3       # Latest stable release of cryptography
+
+# Clipboard support
+pyperclip>=1.11.0          # Clipboard operations
+
+# Build tool (for creating executable)
+pyinstaller>=6.10.0        # Latest PyInstaller (compatible with Python 3.8-3.13+)
+
+# Optional: For better icon support and image handling
+Pillow>=12.0.0             # Image processing library

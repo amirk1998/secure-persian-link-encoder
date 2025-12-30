@@ -1,0 +1,92 @@
+####################################
+# OS & Editor
+####################################
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+.vscode/
+.idea/
+*.log
+
+####################################
+# Environment Variables
+####################################
+.env
+.env.*
+!.env.example
+
+####################################
+# Python
+####################################
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+.eggs/
+dist/
+build/
+pip-wheel-metadata/
+
+# Virtual Environments (IMPORTANT)
+.venv/
+**/.venv/
+venv/
+**/venv/
+ENV/
+env/
+
+####################################
+# Jupyter / Python Tools
+####################################
+.ipynb_checkpoints/
+.pytest_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+####################################
+# Node.js / JavaScript
+####################################
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Build outputs
+dist/
+build/
+out/
+.next/
+.nuxt/
+.svelte-kit/
+coverage/
+
+####################################
+# Frontend tooling
+####################################
+.cache/
+.parcel-cache/
+.vite/
+
+####################################
+# Temporary files
+####################################
+tmp/
+temp/
+*.tmp
+*.bak
+
+####################################
+# Docker
+####################################
+docker-compose.override.yml
+
+####################################
+# Secrets & Credentials
+####################################
+*.pem
+*.key
+*.crt
