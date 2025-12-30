@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>🔐 Secure Persian Link Encoder</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+      }
+
+      .container {
+        background: rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        padding: 40px;
+        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        max-width: 600px;
+        width: 100%;
+        animation: fadeIn 0.5s ease-in;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(-20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      h1 {
+        color: white;
+        text-align: center;
+        margin-bottom: 10px;
+        font-size: 28px;
+      }
+
+      .subtitle {
+        color: rgba(255, 255, 255, 0.8);
+        text-align: center;
+        margin-bottom: 30px;
+        font-size: 14px;
+      }
+
+      .tabs {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 30px;
+      }
+
+      .tab {
+        flex: 1;
+        padding: 12px;
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 10px;
+        color: white;
+        cursor: pointer;
+        text-align: center;
+        transition: all 0.3s ease;
+        font-weight: 500;
+      }
+
+      .tab:hover {
+        background: rgba(255, 255, 255, 0.2);
+      }
+
+      .tab.active {
+        background: rgba(255, 255, 255, 0.3);
+        border-color: rgba(255, 255, 255, 0.5);
+      }
+
+      .tab-content {
+        display: none;
+      }
+
+      .tab-content.active {
+        display: block;
+        animation: slideIn 0.3s ease;
+      }
+
+      @keyframes slideIn {
+        from {
+          opacity: 0;
+          transform: translateX(-10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
+
+      .input-group {
+        margin-bottom: 20px;
+      }
+
+      label {
+        display: block;
+        color: white;
+        margin-bottom: 8px;
+        font-weight: 500;
+        font-size: 14px;
+      }
+
+      input,
+      textarea {
+        width: 100%;
+        padding: 12px;
+        background: rgba(255, 255, 255, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 10px;
+        color: white;
+        font-size: 14px;
+        transition: all 0.3s ease;
+      }
+
+      input::placeholder,
+      textarea::placeholder {
+        color: rgba(255, 255, 255, 0.6);
+      }
+
+      input:focus,
+      textarea:focus {
+        outline: none;
+        background: rgba(255, 255, 255, 0.25);
+        border-color: rgba(255, 255, 255, 0.5);
+      }
+
+      textarea {
+        min-height: 120px;
+        resize: vertical;
+        font-family: 'Courier New', monospace;
+        direction: rtl;
+      }
+
+      .button-group {
+        display: flex;
+        gap: 10px;
+        margin-top: 20px;
+      }
+
+      button {
+        flex: 1;
+        padding: 14px;
+        background: rgba(255, 255, 255, 0.3);
+        border: 1px solid rgba(255, 255, 255, 0.4);
+        border-radius: 10px;
+        color: white;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      button:hover {
+        background: rgba(255, 255, 255, 0.4);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      }
+
+      button:active {
+        transform: translateY(0);
+      }
+
+      button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+      }
+
+      .btn-secondary {
+        background: rgba(255, 255, 255, 0.2);
+      }
+
+      .result-box {
+        margin-top: 20px;
+        padding: 15px;
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 10px;
+        color: white;
+        min-height: 50px;
+        word-break: break-all;
+        direction: rtl;
+        font-family: 'Courier New', monospace;
+      }
+
+      .notification {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 15px 25px;
+        background: rgba(76, 175, 80, 0.9);
+        color: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        display: none;
+        animation: slideInRight 0.3s ease;
+        z-index: 1000;
+      }
+
+      @keyframes slideInRight {
+        from {
+          transform: translateX(100px);
+          opacity: 0;
+        }
+        to {
+          transform: translateX(0);
+          opacity: 1;
+        }
+      }
+
+      .notification.error {
+        background: rgba(244, 67, 54, 0.9);
+      }
+
+      .notification.show {
+        display: block;
+      }
+
+      .info-box {
+        background: rgba(255, 255, 255, 0.1);
+        border-left: 4px solid rgba(255, 255, 255, 0.5);
+        padding: 12px;
+        border-radius: 5px;
+        color: rgba(255, 255, 255, 0.9);
+        font-size: 13px;
+        margin-top: 15px;
+      }
+
+      .checkbox-group {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: white;
+        margin-bottom: 15px;
+      }
+
+      .checkbox-group input[type='checkbox'] {
+        width: auto;
+        cursor: pointer;
+      }
+
+      .footer {
+        text-align: center;
+        color: rgba(255, 255, 255, 0.7);
+        margin-top: 30px;
+        font-size: 12px;
+      }
+
+      .footer a {
+        color: rgba(255, 255, 255, 0.9);
+        text-decoration: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>🔐 Secure Persian Link Encoder</h1>
+      <p class="subtitle">
+        Encrypt URLs into Persian text - Fully Offline & Secure
+      </p>
+
+      <div class="tabs">
+        <div class="tab active" onclick="switchTab('encrypt')">🔒 Encrypt</div>
+        <div class="tab" onclick="switchTab('decrypt')">🔓 Decrypt</div>
+      </div>
+
+      <!-- Encrypt Tab -->
+      <div id="encrypt-tab" class="tab-content active">
+        <div class="input-group">
+          <label>🔗 URL to Encrypt:</label>
+          <input
+            type="text"
+            id="url-input"
+            placeholder="https://example.com/path"
+          />
+        </div>
+
+        <div class="input-group">
+          <label>🔑 Password (Optional):</label>
+          <input
+            type="password"
+            id="password-input"
+            placeholder="Leave empty for default encryption"
+          />
+        </div>
+
+        <div class="checkbox-group">
+          <input
+            type="checkbox"
+            id="show-password"
+            onchange="togglePassword()"
+          />
+          <label for="show-password" style="margin: 0">Show password</label>
+        </div>
+
+        <div class="button-group">
+          <button class="btn-primary" onclick="encryptURL()">🔒 Encrypt</button>
+          <button class="btn-secondary" onclick="resetEncrypt()">
+            🔄 Reset
+          </button>
+        </div>
+
+        <div class="input-group" style="margin-top: 20px">
+          <label>📄 Encrypted Persian Text:</label>
+          <textarea
+            id="encrypted-output"
+            readonly
+            placeholder="Encrypted text will appear here..."
+          ></textarea>
+        </div>
+
+        <div class="button-group">
+          <button onclick="copyToClipboard('encrypted-output')">📋 Copy</button>
+        </div>
+
+        <div class="info-box">
+          ℹ️ <strong>Info:</strong> Without password, anyone with this tool can
+          decrypt. With password, only those who know it can decrypt.
+        </div>
+      </div>
+
+      <!-- Decrypt Tab -->
+      <div id="decrypt-tab" class="tab-content">
+        <div class="input-group">
+          <label>📄 Persian Text to Decrypt:</label>
+          <textarea
+            id="persian-input"
+            placeholder="Paste encrypted Persian text here..."
+          ></textarea>
+        </div>
+
+        <div class="input-group">
+          <label>🔑 Password (if used during encryption):</label>
+          <input
+            type="password"
+            id="decrypt-password-input"
+            placeholder="Leave empty if no password was used"
+          />
+        </div>
+
+        <div class="checkbox-group">
+          <input
+            type="checkbox"
+            id="show-decrypt-password"
+            onchange="toggleDecryptPassword()"
+          />
+          <label for="show-decrypt-password" style="margin: 0"
+            >Show password</label
+          >
+        </div>
+
+        <div class="button-group">
+          <button class="btn-primary" onclick="decryptURL()">🔓 Decrypt</button>
+          <button class="btn-secondary" onclick="resetDecrypt()">
+            🔄 Reset
+          </button>
+        </div>
+
+        <div class="input-group" style="margin-top: 20px">
+          <label>🔗 Decrypted URL:</label>
+          <input
+            type="text"
+            id="decrypted-output"
+            readonly
+            placeholder="Decrypted URL will appear here..."
+          />
+        </div>
+
+        <div class="button-group">
+          <button onclick="copyToClipboard('decrypted-output')">📋 Copy</button>
+          <button onclick="openURL()">🌐 Open URL</button>
+        </div>
+      </div>
+
+      <div class="footer">
+        Made with ❤️ | <a href="https://github.com" target="_blank">GitHub</a> |
+        AES-256-GCM Encryption
+      </div>
+    </div>
+
+    <div class="notification" id="notification"></div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
