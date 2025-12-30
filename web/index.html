@@ -19,6 +19,11 @@
         justify-content: center;
         align-items: center;
         padding: 20px;
+        transition: direction 0.3s ease;
+      }
+
+      body[dir='rtl'] {
+        font-family: Tahoma, 'Segoe UI', sans-serif;
       }
 
       .container {
@@ -44,11 +49,47 @@
         }
       }
 
+      .header-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+      }
+
       h1 {
         color: white;
         text-align: center;
-        margin-bottom: 10px;
         font-size: 28px;
+        flex: 1;
+      }
+
+      .lang-switch {
+        background: rgba(255, 255, 255, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 20px;
+        padding: 5px;
+        display: flex;
+        gap: 5px;
+        cursor: pointer;
+      }
+
+      .lang-btn {
+        padding: 8px 16px;
+        background: transparent;
+        border: none;
+        color: white;
+        border-radius: 15px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: 500;
+      }
+
+      .lang-btn.active {
+        background: rgba(255, 255, 255, 0.3);
+      }
+
+      .lang-btn:hover {
+        background: rgba(255, 255, 255, 0.2);
       }
 
       .subtitle {
@@ -146,6 +187,9 @@
         min-height: 120px;
         resize: vertical;
         font-family: 'Courier New', monospace;
+      }
+
+      body[dir='rtl'] textarea {
         direction: rtl;
       }
 
@@ -192,17 +236,32 @@
         background: rgba(255, 255, 255, 0.2);
       }
 
-      .result-box {
-        margin-top: 20px;
-        padding: 15px;
-        background: rgba(255, 255, 255, 0.1);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        border-radius: 10px;
+      .checkbox-group {
+        display: flex;
+        align-items: center;
+        gap: 10px;
         color: white;
-        min-height: 50px;
-        word-break: break-all;
-        direction: rtl;
-        font-family: 'Courier New', monospace;
+        margin-bottom: 15px;
+      }
+
+      .checkbox-group input[type='checkbox'] {
+        width: auto;
+        cursor: pointer;
+      }
+
+      .info-box {
+        background: rgba(255, 255, 255, 0.1);
+        border-left: 4px solid rgba(255, 255, 255, 0.5);
+        padding: 12px;
+        border-radius: 5px;
+        color: rgba(255, 255, 255, 0.9);
+        font-size: 13px;
+        margin-top: 15px;
+      }
+
+      body[dir='rtl'] .info-box {
+        border-left: none;
+        border-right: 4px solid rgba(255, 255, 255, 0.5);
       }
 
       .notification {
@@ -219,9 +278,26 @@
         z-index: 1000;
       }
 
+      body[dir='rtl'] .notification {
+        right: auto;
+        left: 20px;
+        animation: slideInLeft 0.3s ease;
+      }
+
       @keyframes slideInRight {
         from {
           transform: translateX(100px);
+          opacity: 0;
+        }
+        to {
+          transform: translateX(0);
+          opacity: 1;
+        }
+      }
+
+      @keyframes slideInLeft {
+        from {
+          transform: translateX(-100px);
           opacity: 0;
         }
         to {
@@ -238,29 +314,6 @@
         display: block;
       }
 
-      .info-box {
-        background: rgba(255, 255, 255, 0.1);
-        border-left: 4px solid rgba(255, 255, 255, 0.5);
-        padding: 12px;
-        border-radius: 5px;
-        color: rgba(255, 255, 255, 0.9);
-        font-size: 13px;
-        margin-top: 15px;
-      }
-
-      .checkbox-group {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        color: white;
-        margin-bottom: 15px;
-      }
-
-      .checkbox-group input[type='checkbox'] {
-        width: auto;
-        cursor: pointer;
-      }
-
       .footer {
         text-align: center;
         color: rgba(255, 255, 255, 0.7);
@@ -274,22 +327,35 @@
       }
     </style>
   </head>
-  <body>
+  <body dir="ltr">
     <div class="container">
-      <h1>🔐 Secure Persian Link Encoder</h1>
-      <p class="subtitle">
+      <div class="header-row">
+        <div style="width: 80px"></div>
+        <h1 id="main-title">🔐 Secure Persian Link Encoder</h1>
+        <div class="lang-switch">
+          <button class="lang-btn active" onclick="switchLanguage('en')">
+            EN
+          </button>
+          <button class="lang-btn" onclick="switchLanguage('fa')">فا</button>
+        </div>
+      </div>
+      <p class="subtitle" id="subtitle">
         Encrypt URLs into Persian text - Fully Offline & Secure
       </p>
 
       <div class="tabs">
-        <div class="tab active" onclick="switchTab('encrypt')">🔒 Encrypt</div>
-        <div class="tab" onclick="switchTab('decrypt')">🔓 Decrypt</div>
+        <div class="tab active" onclick="switchTab('encrypt')">
+          <span id="tab-encrypt">🔒 Encrypt</span>
+        </div>
+        <div class="tab" onclick="switchTab('decrypt')">
+          <span id="tab-decrypt">🔓 Decrypt</span>
+        </div>
       </div>
 
       <!-- Encrypt Tab -->
       <div id="encrypt-tab" class="tab-content active">
         <div class="input-group">
-          <label>🔗 URL to Encrypt:</label>
+          <label id="label-url">🔗 URL to Encrypt:</label>
           <input
             type="text"
             id="url-input"
@@ -298,7 +364,7 @@
         </div>
 
         <div class="input-group">
-          <label>🔑 Password (Optional):</label>
+          <label id="label-password">🔑 Password (Optional):</label>
           <input
             type="password"
             id="password-input"
@@ -312,18 +378,22 @@
             id="show-password"
             onchange="togglePassword()"
           />
-          <label for="show-password" style="margin: 0">Show password</label>
+          <label for="show-password" style="margin: 0" id="label-show-pass"
+            >Show password</label
+          >
         </div>
 
         <div class="button-group">
-          <button class="btn-primary" onclick="encryptURL()">🔒 Encrypt</button>
+          <button class="btn-primary" onclick="encryptURL()">
+            <span id="btn-encrypt">🔒 Encrypt</span>
+          </button>
           <button class="btn-secondary" onclick="resetEncrypt()">
-            🔄 Reset
+            <span id="btn-reset-enc">🔄 Reset</span>
           </button>
         </div>
 
         <div class="input-group" style="margin-top: 20px">
-          <label>📄 Encrypted Persian Text:</label>
+          <label id="label-encrypted">📄 Encrypted Persian Text:</label>
           <textarea
             id="encrypted-output"
             readonly
@@ -332,19 +402,24 @@
         </div>
 
         <div class="button-group">
-          <button onclick="copyToClipboard('encrypted-output')">📋 Copy</button>
+          <button onclick="copyToClipboard('encrypted-output')">
+            <span id="btn-copy-enc">📋 Copy</span>
+          </button>
         </div>
 
         <div class="info-box">
-          ℹ️ <strong>Info:</strong> Without password, anyone with this tool can
-          decrypt. With password, only those who know it can decrypt.
+          <span id="info-encrypt"
+            >ℹ️ <strong>Info:</strong> Without password, anyone with this tool
+            can decrypt. With password, only those who know it can
+            decrypt.</span
+          >
         </div>
       </div>
 
       <!-- Decrypt Tab -->
       <div id="decrypt-tab" class="tab-content">
         <div class="input-group">
-          <label>📄 Persian Text to Decrypt:</label>
+          <label id="label-persian">📄 Persian Text to Decrypt:</label>
           <textarea
             id="persian-input"
             placeholder="Paste encrypted Persian text here..."
@@ -352,7 +427,9 @@
         </div>
 
         <div class="input-group">
-          <label>🔑 Password (if used during encryption):</label>
+          <label id="label-decrypt-pass"
+            >🔑 Password (if used during encryption):</label
+          >
           <input
             type="password"
             id="decrypt-password-input"
@@ -366,20 +443,25 @@
             id="show-decrypt-password"
             onchange="toggleDecryptPassword()"
           />
-          <label for="show-decrypt-password" style="margin: 0"
+          <label
+            for="show-decrypt-password"
+            style="margin: 0"
+            id="label-show-dec-pass"
             >Show password</label
           >
         </div>
 
         <div class="button-group">
-          <button class="btn-primary" onclick="decryptURL()">🔓 Decrypt</button>
+          <button class="btn-primary" onclick="decryptURL()">
+            <span id="btn-decrypt">🔓 Decrypt</span>
+          </button>
           <button class="btn-secondary" onclick="resetDecrypt()">
-            🔄 Reset
+            <span id="btn-reset-dec">🔄 Reset</span>
           </button>
         </div>
 
         <div class="input-group" style="margin-top: 20px">
-          <label>🔗 Decrypted URL:</label>
+          <label id="label-decrypted">🔗 Decrypted URL:</label>
           <input
             type="text"
             id="decrypted-output"
@@ -389,14 +471,21 @@
         </div>
 
         <div class="button-group">
-          <button onclick="copyToClipboard('decrypted-output')">📋 Copy</button>
-          <button onclick="openURL()">🌐 Open URL</button>
+          <button onclick="copyToClipboard('decrypted-output')">
+            <span id="btn-copy-dec">📋 Copy</span>
+          </button>
+          <button onclick="openURL()">
+            <span id="btn-open">🌐 Open URL</span>
+          </button>
         </div>
       </div>
 
       <div class="footer">
-        Made with ❤️ | <a href="https://github.com" target="_blank">GitHub</a> |
-        AES-256-GCM Encryption
+        <span id="footer-text"
+          >Made with ❤️ |
+          <a href="https://github.com" target="_blank">GitHub</a> | AES-256-GCM
+          Encryption</span
+        >
       </div>
     </div>
 
